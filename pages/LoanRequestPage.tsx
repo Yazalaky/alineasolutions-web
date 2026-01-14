@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { Send, User, Building, Wallet, AlertCircle, CheckCircle } from 'lucide-react';
 import { CONTRACT_TYPES } from '../constants';
-import { FormData } from '../types';
+import { FormData, ViewState } from '../types';
 
-export const LoanRequestPage: React.FC = () => {
+interface LoanRequestPageProps {
+  onNavigate: (view: ViewState) => void;
+}
+
+export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) => {
   const [formData, setFormData] = useState<FormData>({
     fullName: '',
     docType: 'CC',
@@ -49,7 +53,8 @@ export const LoanRequestPage: React.FC = () => {
             Hemos recibido tus datos correctamente. Uno de nuestros asesores analizará tu perfil y te contactará al número <strong>{formData.phone}</strong> en las próximas horas.
           </p>
           <button
-            onClick={() => window.location.reload()}
+            type="button"
+            onClick={() => onNavigate('home')}
             className="w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
           >
             Volver al inicio
@@ -89,6 +94,7 @@ export const LoanRequestPage: React.FC = () => {
                     value={formData.fullName}
                     onChange={handleChange}
                     placeholder="Ej. Juan Pérez"
+                    autoComplete="name"
                     className="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   />
                 </div>
@@ -111,11 +117,14 @@ export const LoanRequestPage: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Número de Documento</label>
                   <input
                     required
-                    type="number"
+                    type="text"
                     name="docNumber"
                     value={formData.docNumber}
                     onChange={handleChange}
                     placeholder="Ej. 1234567890"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    pattern="[0-9]*"
                     className="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   />
                 </div>
@@ -129,6 +138,7 @@ export const LoanRequestPage: React.FC = () => {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="tucorreo@ejemplo.com"
+                    autoComplete="email"
                     className="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   />
                 </div>
@@ -137,11 +147,13 @@ export const LoanRequestPage: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Número de Celular</label>
                   <input
                     required
-                    type="tel"
+                    type="text"
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="Ej. 300 123 4567"
+                    inputMode="tel"
+                    autoComplete="tel"
                     className="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   />
                 </div>
@@ -165,6 +177,7 @@ export const LoanRequestPage: React.FC = () => {
                     value={formData.company}
                     onChange={handleChange}
                     placeholder="Nombre de la empresa"
+                    autoComplete="organization"
                     className="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   />
                 </div>
@@ -195,6 +208,8 @@ export const LoanRequestPage: React.FC = () => {
                       name="salary"
                       value={formData.salary}
                       onChange={handleChange}
+                      inputMode="numeric"
+                      autoComplete="off"
                       className="block w-full pl-7 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                       placeholder="0"
                     />
@@ -222,6 +237,8 @@ export const LoanRequestPage: React.FC = () => {
                     name="amount"
                     value={formData.amount}
                     onChange={handleChange}
+                    inputMode="numeric"
+                    autoComplete="off"
                     className="block w-full pl-7 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                     placeholder="0"
                   />

@@ -21,8 +21,8 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
   // --- ESTADO PARA SIMULADOR DE CRÉDITO ---
   const [creditInputs, setCreditInputs] = useState<SimulatorInputs>({
     monthlyRate: DEFAULT_MONTHLY_RATE,
-    age: 30,
-    netSalary: 2000000,
+    age: 0,
+    netSalary: 0,
     maxIndebtedness: DEFAULT_MAX_INDEBTEDNESS,
     startDate: '', 
   });
@@ -37,12 +37,22 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
   });
   const [adelantoResults, setAdelantoResults] = useState<AdelantoResult | null>(null);
 
+  const parseNumberInput = (value: string) => {
+    const parsed = parseFloat(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  };
+
   // Efecto para Crédito
   useEffect(() => {
     const years = calculateYearsOfService(creditInputs.startDate);
     setYearsOfService(years);
-    const rows = calculateFirstTimeCredits(creditInputs);
-    setCreditResults(rows);
+    const hasRequiredInputs = creditInputs.age > 0 && creditInputs.netSalary > 0 && creditInputs.startDate;
+    if (hasRequiredInputs) {
+      const rows = calculateFirstTimeCredits(creditInputs);
+      setCreditResults(rows);
+    } else {
+      setCreditResults([]);
+    }
   }, [creditInputs]);
 
   // Handlers Crédito
@@ -50,7 +60,7 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
     const { name, value, type } = e.target;
     setCreditInputs(prev => ({
       ...prev,
-      [name]: type === 'number' ? parseFloat(value) : value
+      [name]: type === 'number' ? parseNumberInput(value) : value
     }));
   };
 
@@ -59,7 +69,7 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
     const { name, value } = e.target;
     setAdelantoInputs(prev => ({
       ...prev,
-      [name]: parseFloat(value)
+      [name]: parseNumberInput(value)
     }));
   };
 
@@ -134,7 +144,7 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
                     <input
                       type="number"
                       name="age"
-                      value={creditInputs.age}
+                      value={creditInputs.age === 0 ? '' : creditInputs.age}
                       onChange={handleCreditChange}
                       className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-brand-500 focus:border-brand-500"
                     />
@@ -151,7 +161,7 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
                       <input
                         type="number"
                         name="netSalary"
-                        value={creditInputs.netSalary}
+                        value={creditInputs.netSalary === 0 ? '' : creditInputs.netSalary}
                         onChange={handleCreditChange}
                         className="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-brand-500 focus:border-brand-500"
                       />
@@ -213,36 +223,44 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-100">
-                        {creditResults.map((row) => (
-                          <tr key={row.term} className={!row.isApplicable ? "opacity-50 bg-gray-50" : "hover:bg-brand-50 transition-colors"}>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <div className={`flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm ${row.isApplicable ? 'bg-brand-100 text-brand-900' : 'bg-gray-200 text-gray-500'}`}>
-                                  {row.term}
-                                </div>
-                                <span className="ml-3 text-sm font-medium text-gray-900">Meses</span>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              {row.isApplicable ? (
-                                <span className="text-base font-bold text-brand-900">
-                                  {formatCurrency(row.amount || 0)}
-                                </span>
-                              ) : (
-                                <span className="text-sm text-gray-400 italic">N/A</span>
-                              )}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                               {row.isApplicable ? (
-                                <span className="text-base font-bold text-accent-600">
-                                  {formatCurrency(row.monthlyPayment || 0)}
-                                </span>
-                              ) : (
-                                <span className="text-sm text-gray-400 italic">N/A</span>
-                              )}
+                        {creditResults.length === 0 ? (
+                          <tr>
+                            <td colSpan={3} className="px-6 py-6 text-sm text-gray-400 text-center">
+                              Completa los datos para ver los resultados.
                             </td>
                           </tr>
-                        ))}
+                        ) : (
+                          creditResults.map((row) => (
+                            <tr key={row.term} className={!row.isApplicable ? "opacity-50 bg-gray-50" : "hover:bg-brand-50 transition-colors"}>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  <div className={`flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm ${row.isApplicable ? 'bg-brand-100 text-brand-900' : 'bg-gray-200 text-gray-500'}`}>
+                                    {row.term}
+                                  </div>
+                                  <span className="ml-3 text-sm font-medium text-gray-900">Meses</span>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {row.isApplicable ? (
+                                  <span className="text-base font-bold text-brand-900">
+                                    {formatCurrency(row.amount || 0)}
+                                  </span>
+                                ) : (
+                                  <span className="text-sm text-gray-400 italic">N/A</span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                 {row.isApplicable ? (
+                                  <span className="text-base font-bold text-accent-600">
+                                    {formatCurrency(row.monthlyPayment || 0)}
+                                  </span>
+                                ) : (
+                                  <span className="text-sm text-gray-400 italic">N/A</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        )}
                       </tbody>
                     </table>
                   </div>
