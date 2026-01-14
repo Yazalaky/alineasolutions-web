@@ -23,16 +23,14 @@ export const Footer: React.FC = () => {
           
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-3 mb-6">
-               <div className="relative w-10 h-10">
-                  <svg viewBox="0 0 100 100" className="w-full h-full text-accent-500 fill-current">
-                    <path d="M65.4,30.2c-5.8-5.6-13.9-8.5-23.4-8.5c-15.6,0-29.5,9.2-34.6,22.8c-1.4,3.7-2.1,7.8-2.1,12c0,16.8,11.2,31.2,26.7,35.4 c3.4,0.9,7,1.4,10.6,1.4c8.4,0,16.2-2.8,22.4-7.6V88h12V48.5C97,33.5,82.8,21.7,65.4,30.2z M65,74.2c-3.6,3.4-8.4,5.4-13.6,5.4 c-9.6,0-17.6-6.8-19.6-15.8c-0.6-2.6-0.9-5.3-0.9-8.1c0-2.3,0.2-4.5,0.6-6.7c2.2-10.6,11.5-18.6,22.6-18.6c4.5,0,8.7,1.3,12.3,3.7 L65,74.2z" />
-                    <path d="M66.4,26.5c2.6-2.5,5.6-4.5,9-5.8c3.4-1.3,7.1-2,10.9-2c2.1,0,4.2,0.2,6.2,0.6V7.4c-2.3-0.6-4.8-1-7.4-1 c-5.8,0-11.2,1.5-16,4.2L66.4,26.5z" />
-                  </svg>
-               </div>
-               <div className="flex flex-col justify-center text-white">
-                  <span className="font-logo font-bold text-3xl leading-none tracking-tight pb-1">alinea</span>
-                  <span className="text-[10px] font-medium opacity-80 uppercase tracking-[0.35em] leading-none ml-1">soluciones</span>
-               </div>
+              <div className="inline-flex items-center justify-center h-16 sm:h-20 md:h-24 rounded-full overflow-hidden bg-brand-900">
+                <img
+                  src="/logo-alinea.png"
+                  srcSet="/logo-alinea@2x.png 2x"
+                  alt="Alinea Soluciones"
+                  className="h-full w-auto object-cover scale-115 -translate-y-[4px]"
+                />
+              </div>
             </div>
             <p className="text-brand-100 mb-6 max-w-md">
               Somos la financiera que entiende tus necesidades. Trabajamos con descuento por nómina para ofrecerte tasas justas, procesos transparentes y la confianza que necesitas para cumplir tus metas.
