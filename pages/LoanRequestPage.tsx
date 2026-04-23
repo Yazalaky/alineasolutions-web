@@ -1,40 +1,127 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Send, User, Building, Wallet, AlertCircle, CheckCircle } from 'lucide-react';
 import { CONTRACT_TYPES } from '../constants';
 import { FormData, ViewState } from '../types';
+import {
+  formatPhoneDisplay,
+  hasLoanRequestErrors,
+  LoanRequestErrors,
+  normalizeLoanRequestData,
+  normalizeLoanRequestFieldValue,
+  sanitizeLoanRequestValue,
+  validateLoanRequestData,
+} from '../utils/loanRequestValidation';
 
 interface LoanRequestPageProps {
   onNavigate: (view: ViewState) => void;
 }
 
-export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) => {
-  const [formData, setFormData] = useState<FormData>({
-    fullName: '',
-    docType: 'CC',
-    docNumber: '',
-    email: '',
-    phone: '',
-    company: '',
-    contractType: CONTRACT_TYPES[0],
-    salary: '',
-    amount: '',
-  });
+const INITIAL_FORM_DATA: FormData = {
+  fullName: '',
+  docType: 'CC',
+  docNumber: '',
+  email: '',
+  phone: '',
+  company: '',
+  contractType: CONTRACT_TYPES[0],
+  salary: '',
+  amount: '',
+};
 
+const ALL_FORM_FIELDS = Object.keys(INITIAL_FORM_DATA) as Array<keyof FormData>;
+
+export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) => {
+  const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
+  const [errors, setErrors] = useState<LoanRequestErrors>({});
+  const [touchedFields, setTouchedFields] = useState<Partial<Record<keyof FormData, boolean>>>({});
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const submitTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (submitTimeoutRef.current !== null) {
+        window.clearTimeout(submitTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const getFieldError = (field: keyof FormData) => {
+    if (!touchedFields[field] && !hasAttemptedSubmit) {
+      return undefined;
+    }
+
+    return errors[field];
+  };
+
+  const getInputClasses = (field: keyof FormData) => {
+    const hasError = Boolean(getFieldError(field));
+
+    return `block w-full px-4 py-3 rounded-lg border focus:ring-2 focus:border-transparent ${
+      hasError
+        ? 'border-red-300 bg-red-50 text-red-900 focus:ring-red-500'
+        : 'border-gray-300 focus:ring-brand-500'
+    }`;
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const field = name as keyof FormData;
+    const sanitizedValue = sanitizeLoanRequestValue(field, value);
+
+    setFormData(prev => {
+      const nextData = { ...prev, [field]: sanitizedValue };
+
+      if (touchedFields[field] || hasAttemptedSubmit) {
+        setErrors(validateLoanRequestData(normalizeLoanRequestData(nextData)));
+      }
+
+      return nextData;
+    });
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const field = e.target.name as keyof FormData;
+
+    setTouchedFields(prev => ({ ...prev, [field]: true }));
+    setFormData(prev => {
+      const nextData = {
+        ...prev,
+        [field]: normalizeLoanRequestFieldValue(field, prev[field]),
+      };
+
+      setErrors(validateLoanRequestData(normalizeLoanRequestData(nextData)));
+      return nextData;
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const normalizedData = normalizeLoanRequestData(formData);
+    const nextErrors = validateLoanRequestData(normalizedData);
+
+    setHasAttemptedSubmit(true);
+    setTouchedFields(
+      ALL_FORM_FIELDS.reduce<Partial<Record<keyof FormData, boolean>>>((acc, field) => {
+        acc[field] = true;
+        return acc;
+      }, {}),
+    );
+    setFormData(normalizedData);
+    setErrors(nextErrors);
+
+    if (hasLoanRequestErrors(nextErrors)) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     setIsSubmitting(true);
 
     // Simulate API call
-    setTimeout(() => {
-      console.log('Solicitud enviada:', formData);
+    submitTimeoutRef.current = window.setTimeout(() => {
+      console.log('Solicitud enviada:', normalizedData);
+      submitTimeoutRef.current = null;
       setIsSubmitting(false);
       setIsSuccess(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -50,7 +137,7 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">¡Solicitud Enviada!</h2>
           <p className="text-gray-600 mb-8">
-            Hemos recibido tus datos correctamente. Uno de nuestros asesores analizará tu perfil y te contactará al número <strong>{formData.phone}</strong> en las próximas horas.
+            Hemos recibido tus datos correctamente. Uno de nuestros asesores analizará tu perfil y te contactará al número <strong>{formatPhoneDisplay(formData.phone)}</strong> en las próximas horas.
           </p>
           <button
             type="button"
@@ -74,8 +161,16 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white shadow-xl rounded-2xl overflow-hidden">
+        <form onSubmit={handleSubmit} noValidate className="bg-white shadow-xl rounded-2xl overflow-hidden">
           <div className="p-8 space-y-8">
+            {hasAttemptedSubmit && hasLoanRequestErrors(errors) && (
+              <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 flex items-start gap-3" role="alert">
+                <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                <p className="text-sm">
+                  Revisa los campos marcados antes de enviar tu solicitud.
+                </p>
+              </div>
+            )}
             
             {/* Personal Info */}
             <div className="space-y-6">
@@ -93,10 +188,18 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
                     name="fullName"
                     value={formData.fullName}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     placeholder="Ej. Juan Pérez"
                     autoComplete="name"
-                    className="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    aria-invalid={Boolean(getFieldError('fullName'))}
+                    aria-describedby={getFieldError('fullName') ? 'fullName-error' : undefined}
+                    className={getInputClasses('fullName')}
                   />
+                  {getFieldError('fullName') && (
+                    <p id="fullName-error" className="mt-2 text-sm text-red-600">
+                      {getFieldError('fullName')}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -105,12 +208,20 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
                     name="docType"
                     value={formData.docType}
                     onChange={handleChange}
-                    className="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    onBlur={handleBlur}
+                    aria-invalid={Boolean(getFieldError('docType'))}
+                    aria-describedby={getFieldError('docType') ? 'docType-error' : undefined}
+                    className={getInputClasses('docType')}
                   >
                     <option value="CC">Cédula de Ciudadanía</option>
                     <option value="CE">Cédula de Extranjería</option>
                     <option value="PP">Pasaporte</option>
                   </select>
+                  {getFieldError('docType') && (
+                    <p id="docType-error" className="mt-2 text-sm text-red-600">
+                      {getFieldError('docType')}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -121,12 +232,20 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
                     name="docNumber"
                     value={formData.docNumber}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     placeholder="Ej. 1234567890"
                     inputMode="numeric"
                     autoComplete="off"
-                    pattern="[0-9]*"
-                    className="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    maxLength={15}
+                    aria-invalid={Boolean(getFieldError('docNumber'))}
+                    aria-describedby={getFieldError('docNumber') ? 'docNumber-error' : undefined}
+                    className={getInputClasses('docNumber')}
                   />
+                  {getFieldError('docNumber') && (
+                    <p id="docNumber-error" className="mt-2 text-sm text-red-600">
+                      {getFieldError('docNumber')}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -137,10 +256,18 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     placeholder="tucorreo@ejemplo.com"
                     autoComplete="email"
-                    className="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    aria-invalid={Boolean(getFieldError('email'))}
+                    aria-describedby={getFieldError('email') ? 'email-error' : undefined}
+                    className={getInputClasses('email')}
                   />
+                  {getFieldError('email') && (
+                    <p id="email-error" className="mt-2 text-sm text-red-600">
+                      {getFieldError('email')}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -151,11 +278,20 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     placeholder="Ej. 300 123 4567"
                     inputMode="tel"
                     autoComplete="tel"
-                    className="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    maxLength={10}
+                    aria-invalid={Boolean(getFieldError('phone'))}
+                    aria-describedby={getFieldError('phone') ? 'phone-error' : undefined}
+                    className={getInputClasses('phone')}
                   />
+                  {getFieldError('phone') && (
+                    <p id="phone-error" className="mt-2 text-sm text-red-600">
+                      {getFieldError('phone')}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -176,10 +312,18 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
                     name="company"
                     value={formData.company}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     placeholder="Nombre de la empresa"
                     autoComplete="organization"
-                    className="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    aria-invalid={Boolean(getFieldError('company'))}
+                    aria-describedby={getFieldError('company') ? 'company-error' : undefined}
+                    className={getInputClasses('company')}
                   />
+                  {getFieldError('company') && (
+                    <p id="company-error" className="mt-2 text-sm text-red-600">
+                      {getFieldError('company')}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -188,12 +332,20 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
                     name="contractType"
                     value={formData.contractType}
                     onChange={handleChange}
-                    className="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    onBlur={handleBlur}
+                    aria-invalid={Boolean(getFieldError('contractType'))}
+                    aria-describedby={getFieldError('contractType') ? 'contractType-error' : undefined}
+                    className={getInputClasses('contractType')}
                   >
                     {CONTRACT_TYPES.map(type => (
                       <option key={type} value={type}>{type}</option>
                     ))}
                   </select>
+                  {getFieldError('contractType') && (
+                    <p id="contractType-error" className="mt-2 text-sm text-red-600">
+                      {getFieldError('contractType')}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -204,16 +356,24 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
                     </div>
                     <input
                       required
-                      type="number"
+                      type="text"
                       name="salary"
                       value={formData.salary}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       inputMode="numeric"
                       autoComplete="off"
-                      className="block w-full pl-7 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                      aria-invalid={Boolean(getFieldError('salary'))}
+                      aria-describedby={getFieldError('salary') ? 'salary-error' : undefined}
+                      className={`${getInputClasses('salary')} pl-7`}
                       placeholder="0"
                     />
                   </div>
+                  {getFieldError('salary') && (
+                    <p id="salary-error" className="mt-2 text-sm text-red-600">
+                      {getFieldError('salary')}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -233,16 +393,24 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
                   </div>
                   <input
                     required
-                    type="number"
+                    type="text"
                     name="amount"
                     value={formData.amount}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     inputMode="numeric"
                     autoComplete="off"
-                    className="block w-full pl-7 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    aria-invalid={Boolean(getFieldError('amount'))}
+                    aria-describedby={getFieldError('amount') ? 'amount-error' : undefined}
+                    className={`${getInputClasses('amount')} pl-7`}
                     placeholder="0"
                   />
                 </div>
+                {getFieldError('amount') && (
+                  <p id="amount-error" className="mt-2 text-sm text-red-600">
+                    {getFieldError('amount')}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -260,7 +428,7 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`flex items-center gap-2 py-3 px-8 border border-transparent rounded-lg shadow-sm text-base font-medium text-white ${isSubmitting ? 'bg-gray-400' : 'bg-brand-600 hover:bg-brand-700'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-all`}
+              className={`flex items-center gap-2 py-3 px-8 border border-transparent rounded-lg shadow-sm text-base font-medium text-white ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-brand-600 hover:bg-brand-700'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-all`}
             >
               {isSubmitting ? 'Enviando...' : (
                 <>
