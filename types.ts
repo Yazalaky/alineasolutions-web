@@ -1,4 +1,10 @@
 export type ViewState = 'home' | 'simulator' | 'apply';
+export type DocumentType = 'CC' | 'CE' | 'PP';
+
+export interface SelectOption<TValue extends string = string> {
+  value: TValue;
+  label: string;
+}
 
 export interface LoanParams {
   amount: number;
@@ -47,7 +53,7 @@ export interface FAQItem {
 
 export interface FormData {
   fullName: string;
-  docType: string;
+  docType: DocumentType;
   docNumber: string;
   email: string;
   phone: string;

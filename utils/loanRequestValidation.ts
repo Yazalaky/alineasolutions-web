@@ -1,10 +1,10 @@
-import { CONTRACT_TYPES } from '../constants';
-import { FormData } from '../types';
+import { CONTRACT_TYPES, DOCUMENT_TYPE_OPTIONS } from '../constants';
+import { DocumentType, FormData } from '../types';
 
 export type LoanRequestField = keyof FormData;
 export type LoanRequestErrors = Partial<Record<LoanRequestField, string>>;
 
-const VALID_DOC_TYPES = ['CC', 'CE', 'PP'] as const;
+const VALID_DOC_TYPES: DocumentType[] = DOCUMENT_TYPE_OPTIONS.map(({ value }) => value);
 const DIGIT_ONLY_FIELDS: LoanRequestField[] = ['docNumber', 'phone', 'salary', 'amount'];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -60,7 +60,7 @@ export const validateLoanRequestData = (data: FormData): LoanRequestErrors => {
     errors.fullName = 'Ingresa tu nombre completo.';
   }
 
-  if (!VALID_DOC_TYPES.includes(data.docType as (typeof VALID_DOC_TYPES)[number])) {
+  if (!VALID_DOC_TYPES.includes(data.docType)) {
     errors.docType = 'Selecciona un tipo de documento válido.';
   }
 

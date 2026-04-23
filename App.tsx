@@ -6,18 +6,7 @@ import { LandingPage } from './pages/LandingPage';
 import { SimulatorPage } from './pages/SimulatorPage';
 import { LoanRequestPage } from './pages/LoanRequestPage';
 import { ViewState } from './types';
-
-const getViewFromHash = (): ViewState => {
-  if (typeof window === 'undefined') {
-    return 'home';
-  }
-
-  const hash = window.location.hash.replace(/^#\/?/, '');
-  if (hash === 'simulator' || hash === 'apply') {
-    return hash;
-  }
-  return 'home';
-};
+import { buildHashForView, getViewFromHash } from './utils/navigation';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>(() => getViewFromHash());
@@ -37,7 +26,7 @@ const App: React.FC = () => {
       return;
     }
 
-    const nextHash = view === 'home' ? '' : `#${view}`;
+    const nextHash = buildHashForView(view);
     if (window.location.hash !== nextHash) {
       window.location.hash = nextHash;
     }

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Send, User, Building, Wallet, AlertCircle, CheckCircle } from 'lucide-react';
-import { CONTRACT_TYPES } from '../constants';
+import { APP_NAME, CONTRACT_TYPES, DEFAULT_DOCUMENT_TYPE, DOCUMENT_TYPE_OPTIONS } from '../constants';
 import { FormData, ViewState } from '../types';
 import {
   formatPhoneDisplay,
@@ -18,7 +18,7 @@ interface LoanRequestPageProps {
 
 const INITIAL_FORM_DATA: FormData = {
   fullName: '',
-  docType: 'CC',
+  docType: DEFAULT_DOCUMENT_TYPE,
   docNumber: '',
   email: '',
   phone: '',
@@ -211,11 +211,13 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
                     onBlur={handleBlur}
                     aria-invalid={Boolean(getFieldError('docType'))}
                     aria-describedby={getFieldError('docType') ? 'docType-error' : undefined}
-                    className={getInputClasses('docType')}
+                  className={getInputClasses('docType')}
                   >
-                    <option value="CC">Cédula de Ciudadanía</option>
-                    <option value="CE">Cédula de Extranjería</option>
-                    <option value="PP">Pasaporte</option>
+                    {DOCUMENT_TYPE_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </select>
                   {getFieldError('docType') && (
                     <p id="docType-error" className="mt-2 text-sm text-red-600">
@@ -418,7 +420,7 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
             <div className="bg-yellow-50 p-4 rounded-lg flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-yellow-800">
-                Al enviar este formulario, aceptas nuestras políticas de tratamiento de datos y autorizas a <strong>Alinea Soluciones</strong> a consultar tu historial crediticio para fines de estudio.
+                Al enviar este formulario, aceptas nuestras políticas de tratamiento de datos y autorizas a <strong>{APP_NAME}</strong> a consultar tu historial crediticio para fines de estudio.
               </p>
             </div>
 

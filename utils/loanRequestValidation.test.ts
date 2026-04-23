@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { FormData } from '../types';
 import {
   formatPhoneDisplay,
   hasLoanRequestErrors,
@@ -40,7 +41,7 @@ describe('loanRequestValidation', () => {
   it('reporta errores cuando los campos requeridos son invalidos', () => {
     const errors = validateLoanRequestData({
       fullName: 'Al',
-      docType: 'TI',
+      docType: 'TI' as unknown as FormData['docType'],
       docNumber: '123',
       email: 'correo-invalido',
       phone: '30012',

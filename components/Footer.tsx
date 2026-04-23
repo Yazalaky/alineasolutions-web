@@ -1,19 +1,7 @@
 import React from 'react';
 import { Mail, Phone, MapPin } from 'lucide-react';
-
-const PseLogo = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 100 100" className={className}>
-    <circle cx="50" cy="50" r="50" fill="#183660" />
-    <path d="M15,50 L25,50 L30,42" fill="none" stroke="#FABD00" strokeWidth="3" strokeLinecap="round" />
-    <circle cx="15" cy="50" r="4" fill="#FABD00" />
-    <circle cx="28" cy="35" r="3" fill="#FABD00" />
-    <circle cx="20" cy="65" r="3" fill="#FABD00" />
-    <path d="M35,40 C35,40 45,38 45,48 C45,58 35,58 35,58 L35,70" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" />
-    <path d="M55,60 C55,60 50,60 50,55 C50,50 60,50 60,45 C60,40 55,40 55,40" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" />
-    <path d="M70,55 H80 V40 H70 V70 H80" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" />
-    <text x="38" y="32" fill="white" fontSize="12" fontFamily="sans-serif" fontWeight="bold">ach</text>
-  </svg>
-);
+import { APP_NAME, PSE_PAYMENT_URL } from '../constants';
+import { PseLogo } from './PseLogo';
 
 export const Footer: React.FC = () => {
   return (
@@ -27,7 +15,7 @@ export const Footer: React.FC = () => {
                 <img
                   src="/logo-alinea.png"
                   srcSet="/logo-alinea@2x.png 2x"
-                  alt="Alinea Soluciones"
+                  alt={APP_NAME}
                   className="h-full w-auto object-cover scale-115 -translate-y-[4px]"
                 />
               </div>
@@ -60,7 +48,7 @@ export const Footer: React.FC = () => {
             <h4 className="text-lg font-bold mb-4 text-white">Pagos en Línea</h4>
             <p className="text-sm text-brand-100 mb-3">Paga tu cuota fácil y seguro:</p>
             <a 
-              href="https://micrositios.avalpaycenter.com/alinea-soluciones-sas-ma"
+              href={PSE_PAYMENT_URL}
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-block hover:opacity-90 transition-opacity bg-white p-2 rounded-xl"
@@ -84,7 +72,7 @@ export const Footer: React.FC = () => {
         </div>
 
         <div className="border-t border-brand-800 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-brand-200">
-          <p>&copy; {new Date().getFullYear()} Alinea Soluciones. Todos los derechos reservados.</p>
+          <p>&copy; {new Date().getFullYear()} {APP_NAME}. Todos los derechos reservados.</p>
           <p className="mt-2 md:mt-0 opacity-75">
             Créditos sujetos a estudio y aprobación.
           </p>

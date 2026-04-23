@@ -1,12 +1,21 @@
-import { CreditTermCondition, FAQItem } from "./types";
+import { CreditTermCondition, DocumentType, FAQItem, SelectOption, ViewState } from "./types";
 
 export const APP_NAME = "Alinea Soluciones";
+export const PSE_PAYMENT_URL = "https://micrositios.avalpaycenter.com/alinea-soluciones-sas-ma";
+export const APP_VIEWS: ViewState[] = ['home', 'simulator', 'apply'];
 
 // Valores por defecto para el simulador
 export const DEFAULT_MONTHLY_RATE = 0.028; // 2.8%
 export const DEFAULT_MAX_INDEBTEDNESS = 0.3; // 30%
 export const DEFAULT_ADELANTO_COMMISSION_RATE = 5; // 5%
 export const DEFAULT_ADELANTO_TAX_RATE = 4; // 4x1000
+export const DEFAULT_DOCUMENT_TYPE: DocumentType = 'CC';
+
+export const DOCUMENT_TYPE_OPTIONS: SelectOption<DocumentType>[] = [
+  { value: 'CC', label: 'Cédula de Ciudadanía' },
+  { value: 'CE', label: 'Cédula de Extranjería' },
+  { value: 'PP', label: 'Pasaporte' },
+];
 
 export const CREDIT_TERM_CONDITIONS: CreditTermCondition[] = [
   {

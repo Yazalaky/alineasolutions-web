@@ -1,27 +1,13 @@
 import React, { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { ViewState } from '../types';
+import { APP_NAME, PSE_PAYMENT_URL } from '../constants';
+import { PseLogo } from './PseLogo';
 
 interface HeaderProps {
   currentView: ViewState;
   onNavigate: (view: ViewState) => void;
 }
-
-const PseLogo = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 100 100" className={className}>
-    <circle cx="50" cy="50" r="50" fill="#183660" />
-    {/* Yellow Circuit Lines */}
-    <path d="M15,50 L25,50 L30,42" fill="none" stroke="#FABD00" strokeWidth="3" strokeLinecap="round" />
-    <circle cx="15" cy="50" r="4" fill="#FABD00" />
-    <circle cx="28" cy="35" r="3" fill="#FABD00" />
-    <circle cx="20" cy="65" r="3" fill="#FABD00" />
-    {/* Text PSE approximation */}
-    <path d="M35,40 C35,40 45,38 45,48 C45,58 35,58 35,58 L35,70" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" />
-    <path d="M55,60 C55,60 50,60 50,55 C50,50 60,50 60,45 C60,40 55,40 55,40" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" />
-    <path d="M70,55 H80 V40 H70 V70 H80" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" />
-    <text x="38" y="32" fill="white" fontSize="12" fontFamily="sans-serif" fontWeight="bold">ach</text>
-  </svg>
-);
 
 export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -46,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
             <img
               src="/logo-alinea.png"
               srcSet="/logo-alinea@2x.png 2x"
-              alt="Alinea Soluciones"
+              alt={APP_NAME}
               className="h-20 sm:h-22 md:h-24 w-auto object-contain"
             />
           </button>
@@ -70,7 +56,7 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
             
             {/* PSE Button Desktop */}
             <a 
-              href="https://micrositios.avalpaycenter.com/alinea-soluciones-sas-ma" 
+              href={PSE_PAYMENT_URL}
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-full transition-all group"
@@ -121,7 +107,7 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
             </button>
             
             <a 
-              href="https://micrositios.avalpaycenter.com/alinea-soluciones-sas-ma"
+              href={PSE_PAYMENT_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="flex w-full items-center gap-3 px-3 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-md"
