@@ -1,10 +1,27 @@
-import { FAQItem } from "./types";
+import { CreditTermCondition, FAQItem } from "./types";
 
 export const APP_NAME = "Alinea Soluciones";
 
 // Valores por defecto para el simulador
 export const DEFAULT_MONTHLY_RATE = 0.028; // 2.8%
 export const DEFAULT_MAX_INDEBTEDNESS = 0.3; // 30%
+export const DEFAULT_ADELANTO_COMMISSION_RATE = 5; // 5%
+export const DEFAULT_ADELANTO_TAX_RATE = 4; // 4x1000
+
+export const CREDIT_TERM_CONDITIONS: CreditTermCondition[] = [
+  {
+    term: 12,
+    description: 'Disponible para todos los perfiles.',
+  },
+  {
+    term: 18,
+    description: 'Requiere ser mayor de 35 años y tener más de 2 años de vinculación.',
+  },
+  {
+    term: 24,
+    description: 'Requiere ser mayor de 35 años y tener más de 3 años de vinculación.',
+  },
+];
 
 export const FAQS: FAQItem[] = [
   {

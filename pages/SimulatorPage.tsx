@@ -1,13 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { DollarSign, TrendingUp, Info, User, Percent, Briefcase, Calculator, FileText, ArrowRightCircle } from 'lucide-react';
 import { 
-  calculateFirstTimeCredits, 
-  calculateYearsOfService, 
   calculateAdelanto,
   formatCurrency 
 } from '../utils/loanCalculator';
-import { ViewState, SimulatorInputs, CreditRow, AdelantoInputs, AdelantoResult } from '../types';
-import { DEFAULT_MONTHLY_RATE, DEFAULT_MAX_INDEBTEDNESS } from '../constants';
+import { ViewState, SimulatorInputs, AdelantoInputs, AdelantoResult } from '../types';
+import { CREDIT_TERM_CONDITIONS } from '../constants';
+import {
+  canCalculateAdelanto,
+  createInitialAdelantoInputs,
+  createInitialCreditInputs,
+  getCreditSimulation,
+  parseSimulatorNumberInput,
+} from '../utils/simulatorState';
 
 interface SimulatorPageProps {
   onNavigate: (view: ViewState) => void;
@@ -19,48 +24,20 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
   const [activeTab, setActiveTab] = useState<TabType>('credit');
 
   // --- ESTADO PARA SIMULADOR DE CRÉDITO ---
-  const [creditInputs, setCreditInputs] = useState<SimulatorInputs>({
-    monthlyRate: DEFAULT_MONTHLY_RATE,
-    age: 0,
-    netSalary: 0,
-    maxIndebtedness: DEFAULT_MAX_INDEBTEDNESS,
-    startDate: '', 
-  });
-  const [yearsOfService, setYearsOfService] = useState<number>(0);
-  const [creditResults, setCreditResults] = useState<CreditRow[]>([]);
+  const [creditInputs, setCreditInputs] = useState<SimulatorInputs>(() => createInitialCreditInputs());
 
   // --- ESTADO PARA SIMULADOR DE ADELANTO ---
-  const [adelantoInputs, setAdelantoInputs] = useState<AdelantoInputs>({
-    invoiceValue: 0,
-    commissionRate: 5, // 5% por defecto
-    taxRate: 4, // 4 (para 4x1000) por defecto (oculto en UI)
-  });
+  const [adelantoInputs, setAdelantoInputs] = useState<AdelantoInputs>(() => createInitialAdelantoInputs());
   const [adelantoResults, setAdelantoResults] = useState<AdelantoResult | null>(null);
-
-  const parseNumberInput = (value: string) => {
-    const parsed = parseFloat(value);
-    return Number.isNaN(parsed) ? 0 : parsed;
-  };
-
-  // Efecto para Crédito
-  useEffect(() => {
-    const years = calculateYearsOfService(creditInputs.startDate);
-    setYearsOfService(years);
-    const hasRequiredInputs = creditInputs.age > 0 && creditInputs.netSalary > 0 && creditInputs.startDate;
-    if (hasRequiredInputs) {
-      const rows = calculateFirstTimeCredits(creditInputs);
-      setCreditResults(rows);
-    } else {
-      setCreditResults([]);
-    }
-  }, [creditInputs]);
+  const { yearsOfService, creditResults } = getCreditSimulation(creditInputs);
+  const isAdelantoReady = canCalculateAdelanto(adelantoInputs);
 
   // Handlers Crédito
   const handleCreditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
     setCreditInputs(prev => ({
       ...prev,
-      [name]: type === 'number' ? parseNumberInput(value) : value
+      [name]: type === 'number' ? parseSimulatorNumberInput(value) : value
     }));
   };
 
@@ -69,11 +46,15 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
     const { name, value } = e.target;
     setAdelantoInputs(prev => ({
       ...prev,
-      [name]: parseNumberInput(value)
+      [name]: parseSimulatorNumberInput(value)
     }));
   };
 
   const calculateAdelantoClick = () => {
+    if (!isAdelantoReady) {
+      return;
+    }
+
     const res = calculateAdelanto(adelantoInputs);
     setAdelantoResults(res);
   };
@@ -130,7 +111,7 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
                   <div className="bg-brand-50 rounded-lg p-4 border border-brand-100 flex items-center justify-between">
                     <div>
                       <span className="block text-xs font-bold text-brand-600 uppercase tracking-wide">Tasa Mensual Fija</span>
-                      <span className="text-2xl font-bold text-brand-900">2.8% M.V.</span>
+                      <span className="text-2xl font-bold text-brand-900">{(creditInputs.monthlyRate * 100).toFixed(1)}% M.V.</span>
                     </div>
                     <div className="h-10 w-10 bg-white rounded-full flex items-center justify-center text-brand-500 shadow-sm">
                       <Percent className="w-5 h-5" />
@@ -270,9 +251,11 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
                     <div className="text-sm text-blue-800">
                       <p className="font-semibold mb-1">Condiciones de Cálculo:</p>
                       <ul className="list-disc pl-4 space-y-1 opacity-90">
-                        <li><strong>12 Meses:</strong> Disponible para todos los perfiles.</li>
-                        <li><strong>18 Meses:</strong> Requiere ser mayor de 35 años y tener más de 2 años de vinculación.</li>
-                        <li><strong>24 Meses:</strong> Requiere ser mayor de 35 años y tener más de 3 años de vinculación.</li>
+                        {CREDIT_TERM_CONDITIONS.map((condition) => (
+                          <li key={condition.term}>
+                            <strong>{condition.term} Meses:</strong> {condition.description}
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   </div>
@@ -338,7 +321,12 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
 
                   <button
                     onClick={calculateAdelantoClick}
-                    className="w-full mt-4 px-6 py-4 bg-accent-500 hover:bg-accent-600 text-white font-bold rounded-xl shadow-lg shadow-accent-500/20 transform transition hover:-translate-y-1 flex justify-center items-center gap-2"
+                    disabled={!isAdelantoReady}
+                    className={`w-full mt-4 px-6 py-4 text-white font-bold rounded-xl shadow-lg transform transition flex justify-center items-center gap-2 ${
+                      isAdelantoReady
+                        ? 'bg-accent-500 hover:bg-accent-600 shadow-accent-500/20 hover:-translate-y-1'
+                        : 'bg-gray-300 shadow-none cursor-not-allowed'
+                    }`}
                   >
                     Calcular Adelanto <ArrowRightCircle className="w-5 h-5" />
                   </button>

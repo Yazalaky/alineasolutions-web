@@ -20,6 +20,11 @@ export interface CreditRow {
   isApplicable: boolean; // Si cumple condiciones
 }
 
+export interface CreditTermCondition {
+  term: number;
+  description: string;
+}
+
 // Interfaces para Adelanto Alinea
 export interface AdelantoInputs {
   invoiceValue: number; // Valor de la factura
