@@ -45,14 +45,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <button 
+                type="button"
                 onClick={() => onNavigate('simulator')}
-                className="px-8 py-4 bg-accent-500 hover:bg-accent-600 text-white font-bold rounded-full shadow-lg shadow-accent-500/30 transform transition hover:-translate-y-1 flex justify-center items-center gap-2"
+                className="px-8 py-4 bg-accent-500 hover:bg-accent-600 text-white font-bold rounded-full shadow-lg shadow-accent-500/30 transform transition hover:-translate-y-1 flex justify-center items-center gap-2 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-brand-900"
               >
                 Simula tu crédito <Calculator className="w-5 h-5" />
               </button>
               <button 
+                type="button"
                 onClick={() => onNavigate('apply')}
-                className="px-8 py-4 bg-transparent border border-white/30 hover:bg-white/10 text-white font-bold rounded-full transition flex justify-center items-center"
+                className="px-8 py-4 bg-transparent border border-white/30 hover:bg-white/10 text-white font-bold rounded-full transition flex justify-center items-center focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-brand-900"
               >
                 Solicita tu crédito
               </button>
@@ -148,7 +150,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             {FAQS.map((faq, index) => (
               <div key={index} className="border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
                 <button
+                  type="button"
                   onClick={() => toggleFaq(index)}
+                  aria-expanded={openFaqIndex === index}
+                  aria-controls={`faq-panel-${index}`}
+                  id={`faq-button-${index}`}
                   className="w-full flex justify-between items-center p-5 sm:p-6 text-left bg-white hover:bg-gray-50 transition-colors focus:outline-none"
                 >
                   <span className="font-semibold text-brand-900 text-lg">{faq.question}</span>
@@ -159,7 +165,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   )}
                 </button>
                 {openFaqIndex === index && (
-                  <div className="p-5 sm:p-6 bg-brand-50 border-t border-gray-100 text-gray-700 leading-relaxed">
+                  <div
+                    id={`faq-panel-${index}`}
+                    role="region"
+                    aria-labelledby={`faq-button-${index}`}
+                    className="p-5 sm:p-6 bg-brand-50 border-t border-gray-100 text-gray-700 leading-relaxed"
+                  >
                     {faq.answer}
                   </div>
                 )}
@@ -174,8 +185,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-brand-900 mb-8">¿Listo para cumplir esa meta?</h2>
           <button 
+            type="button"
             onClick={() => onNavigate('apply')}
-            className="px-12 py-5 bg-accent-500 hover:bg-accent-600 text-white text-lg font-bold rounded-full shadow-xl shadow-accent-500/20 transform transition hover:scale-105"
+            className="px-12 py-5 bg-accent-500 hover:bg-accent-600 text-white text-lg font-bold rounded-full shadow-xl shadow-accent-500/20 transform transition hover:scale-105 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2"
           >
             Solicita tu crédito ahora
           </button>

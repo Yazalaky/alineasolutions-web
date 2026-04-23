@@ -34,7 +34,7 @@ export const FloatingButtons: React.FC = () => {
       setIsOverDark(isDark);
     };
 
-    window.addEventListener('scroll', checkScrollAndContrast);
+    window.addEventListener('scroll', checkScrollAndContrast, { passive: true });
     // Initial check
     checkScrollAndContrast();
 
@@ -50,8 +50,9 @@ export const FloatingButtons: React.FC = () => {
       {/* Scroll to Top Button */}
       {/* pointer-events-auto is needed because parent has pointer-events-none to avoid blocking click on elements below */}
       <button
+        type="button"
         onClick={scrollToTop}
-        className={`pointer-events-auto p-3 rounded-full shadow-lg transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl focus:outline-none flex items-center justify-center ${
+        className={`pointer-events-auto p-3 rounded-full shadow-lg transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 flex items-center justify-center ${
           showScrollTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
         } ${
           isOverDark 
@@ -69,12 +70,15 @@ export const FloatingButtons: React.FC = () => {
         href="https://wa.me/573173638903"
         target="_blank"
         rel="noopener noreferrer"
-        className="pointer-events-auto p-4 bg-[#25D366] text-white rounded-full shadow-lg hover:bg-[#20bd5a] transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl flex items-center justify-center group"
-        aria-label="Chat de WhatsApp"
+        className="pointer-events-auto p-4 bg-[#25D366] text-white rounded-full shadow-lg hover:bg-[#20bd5a] transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl flex items-center justify-center group focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#25D366]"
+        aria-label="Abrir chat de WhatsApp con un asesor, se abre en una nueva pestaña"
         title="Chat con un asesor"
       >
         <WhatsAppIcon />
-        <span className="absolute right-full mr-3 bg-white text-gray-800 px-3 py-1 rounded-lg text-sm font-medium shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap hidden md:block pointer-events-none">
+        <span
+          aria-hidden="true"
+          className="absolute right-full mr-3 bg-white text-gray-800 px-3 py-1 rounded-lg text-sm font-medium shadow-md opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-300 whitespace-nowrap hidden md:block pointer-events-none"
+        >
           ¡Hablemos!
         </span>
       </a>

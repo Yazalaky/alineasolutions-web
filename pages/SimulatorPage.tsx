@@ -22,6 +22,10 @@ type TabType = 'credit' | 'adelanto';
 
 export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
   const [activeTab, setActiveTab] = useState<TabType>('credit');
+  const creditTabId = 'simulator-tab-credit';
+  const adelantoTabId = 'simulator-tab-adelanto';
+  const creditPanelId = 'simulator-panel-credit';
+  const adelantoPanelId = 'simulator-panel-adelanto';
 
   // --- ESTADO PARA SIMULADOR DE CRÉDITO ---
   const [creditInputs, setCreditInputs] = useState<SimulatorInputs>(() => createInitialCreditInputs());
@@ -73,8 +77,13 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
 
         {/* TABS DE NAVEGACIÓN */}
         <div className="flex justify-center mb-10">
-          <div className="bg-white p-1 rounded-xl shadow-sm border border-gray-200 inline-flex">
+          <div role="tablist" aria-label="Tipos de simulador" className="bg-white p-1 rounded-xl shadow-sm border border-gray-200 inline-flex">
             <button
+              type="button"
+              id={creditTabId}
+              role="tab"
+              aria-selected={activeTab === 'credit'}
+              aria-controls={creditPanelId}
               onClick={() => setActiveTab('credit')}
               className={`flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-bold transition-all ${
                 activeTab === 'credit' 
@@ -85,6 +94,11 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
               <User className="w-4 h-4" /> Crédito Nómina
             </button>
             <button
+              type="button"
+              id={adelantoTabId}
+              role="tab"
+              aria-selected={activeTab === 'adelanto'}
+              aria-controls={adelantoPanelId}
               onClick={() => setActiveTab('adelanto')}
               className={`flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-bold transition-all ${
                 activeTab === 'adelanto' 
@@ -99,7 +113,12 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
 
         {/* --- CONTENIDO SIMULADOR CRÉDITO --- */}
         {activeTab === 'credit' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div
+            id={creditPanelId}
+            role="tabpanel"
+            aria-labelledby={creditTabId}
+            className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500"
+          >
             {/* INPUTS CRÉDITO */}
             <div className="lg:col-span-5 space-y-6">
               <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
@@ -119,12 +138,14 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="credit-age" className="block text-sm font-medium text-gray-700 mb-1">
                       Edad (años)
                     </label>
                     <input
+                      id="credit-age"
                       type="number"
                       name="age"
+                      min={0}
                       value={creditInputs.age === 0 ? '' : creditInputs.age}
                       onChange={handleCreditChange}
                       className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-brand-500 focus:border-brand-500"
@@ -132,7 +153,7 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="credit-net-salary" className="block text-sm font-medium text-gray-700 mb-1">
                       Salario Neto Mensual
                     </label>
                     <div className="relative rounded-md shadow-sm">
@@ -140,8 +161,10 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
                         <DollarSign className="h-4 w-4 text-gray-400" />
                       </div>
                       <input
+                        id="credit-net-salary"
                         type="number"
                         name="netSalary"
+                        min={0}
                         value={creditInputs.netSalary === 0 ? '' : creditInputs.netSalary}
                         onChange={handleCreditChange}
                         className="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-brand-500 focus:border-brand-500"
@@ -150,10 +173,11 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="credit-start-date" className="block text-sm font-medium text-gray-700 mb-1">
                       Fecha de Ingreso Laboral
                     </label>
                     <input
+                      id="credit-start-date"
                       type="date"
                       name="startDate"
                       value={creditInputs.startDate}
@@ -188,8 +212,11 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
                 </div>
 
                 <div className="p-6 sm:p-8 flex-grow">
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto" aria-live="polite">
                     <table className="min-w-full divide-y divide-gray-200">
+                      <caption className="sr-only">
+                        Resultados del simulador de crédito por nómina.
+                      </caption>
                       <thead>
                         <tr>
                           <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 rounded-tl-lg rounded-bl-lg">
@@ -263,6 +290,7 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
                   <div className="mt-8 flex justify-center">
                      <button
                       onClick={() => onNavigate('apply')}
+                      type="button"
                       className="w-full sm:w-auto px-8 py-3 bg-brand-900 hover:bg-brand-800 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
                     >
                       Solicitar Crédito Ahora
@@ -276,7 +304,12 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
 
         {/* --- CONTENIDO SIMULADOR ADELANTO (NUEVO) --- */}
         {activeTab === 'adelanto' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div
+            id={adelantoPanelId}
+            role="tabpanel"
+            aria-labelledby={adelantoTabId}
+            className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500"
+          >
             {/* INPUTS ADELANTO */}
             <div className="lg:col-span-5 space-y-6">
               <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
@@ -299,7 +332,7 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="adelanto-invoice-value" className="block text-sm font-medium text-gray-700 mb-1">
                       Valor de la Factura
                     </label>
                     <div className="relative rounded-md shadow-sm">
@@ -307,8 +340,10 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
                         <DollarSign className="h-4 w-4 text-gray-400" />
                       </div>
                       <input
+                        id="adelanto-invoice-value"
                         type="number"
                         name="invoiceValue"
+                        min={0}
                         value={adelantoInputs.invoiceValue || ''}
                         onChange={handleAdelantoChange}
                         placeholder="Ej. 5000000"
@@ -320,8 +355,10 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
                   {/* Eliminados campos editables de Comisión y 4x1000 según requerimiento */}
 
                   <button
+                    type="button"
                     onClick={calculateAdelantoClick}
                     disabled={!isAdelantoReady}
+                    aria-disabled={!isAdelantoReady}
                     className={`w-full mt-4 px-6 py-4 text-white font-bold rounded-xl shadow-lg transform transition flex justify-center items-center gap-2 ${
                       isAdelantoReady
                         ? 'bg-accent-500 hover:bg-accent-600 shadow-accent-500/20 hover:-translate-y-1'
@@ -337,7 +374,10 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
             {/* RESULTADOS ADELANTO */}
             <div className="lg:col-span-7">
                {adelantoResults ? (
-                <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 h-full animate-in fade-in zoom-in duration-300">
+                <div
+                  className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 h-full animate-in fade-in zoom-in duration-300"
+                  aria-live="polite"
+                >
                   <div className="p-6 sm:p-8 bg-accent-500 text-white">
                     <h3 className="text-xl font-bold flex items-center gap-2">
                       <FileText className="w-5 h-5 text-white" /> Detalle de Consignación
@@ -373,7 +413,7 @@ export const SimulatorPage: React.FC<SimulatorPageProps> = ({ onNavigate }) => {
                 </div>
                ) : (
                  /* Estado vacío (antes de calcular) */
-                 <div className="bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 h-full flex flex-col items-center justify-center p-12 text-center opacity-70">
+                 <div className="bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 h-full flex flex-col items-center justify-center p-12 text-center opacity-70" role="status" aria-live="polite">
                     <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
                        <Calculator className="w-8 h-8 text-gray-300" />
                     </div>

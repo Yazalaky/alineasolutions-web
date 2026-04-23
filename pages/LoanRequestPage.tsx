@@ -37,6 +37,8 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const successHeadingRef = useRef<HTMLHeadingElement | null>(null);
   const submitTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -46,6 +48,12 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (isSuccess) {
+      successHeadingRef.current?.focus();
+    }
+  }, [isSuccess]);
 
   const getFieldError = (field: keyof FormData) => {
     if (!touchedFields[field] && !hasAttemptedSubmit) {
@@ -113,6 +121,10 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
 
     if (hasLoanRequestErrors(nextErrors)) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.requestAnimationFrame(() => {
+        const firstInvalidField = formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]');
+        firstInvalidField?.focus();
+      });
       return;
     }
 
@@ -135,7 +147,9 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
           <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
             <CheckCircle className="h-10 w-10 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">¡Solicitud Enviada!</h2>
+          <h2 ref={successHeadingRef} tabIndex={-1} className="text-2xl font-bold text-gray-900 mb-2 focus:outline-none">
+            ¡Solicitud Enviada!
+          </h2>
           <p className="text-gray-600 mb-8">
             Hemos recibido tus datos correctamente. Uno de nuestros asesores analizará tu perfil y te contactará al número <strong>{formatPhoneDisplay(formData.phone)}</strong> en las próximas horas.
           </p>
@@ -161,10 +175,10 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} noValidate className="bg-white shadow-xl rounded-2xl overflow-hidden">
+        <form ref={formRef} onSubmit={handleSubmit} noValidate className="bg-white shadow-xl rounded-2xl overflow-hidden">
           <div className="p-8 space-y-8">
             {hasAttemptedSubmit && hasLoanRequestErrors(errors) && (
-              <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 flex items-start gap-3" role="alert">
+              <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 flex items-start gap-3" role="alert" aria-live="assertive">
                 <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                 <p className="text-sm">
                   Revisa los campos marcados antes de enviar tu solicitud.
@@ -181,8 +195,9 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="col-span-1 md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
+                  <label htmlFor="loan-full-name" className="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
                   <input
+                    id="loan-full-name"
                     required
                     type="text"
                     name="fullName"
@@ -203,8 +218,9 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Documento</label>
+                  <label htmlFor="loan-doc-type" className="block text-sm font-medium text-gray-700 mb-1">Tipo de Documento</label>
                   <select
+                    id="loan-doc-type"
                     name="docType"
                     value={formData.docType}
                     onChange={handleChange}
@@ -227,8 +243,9 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Número de Documento</label>
+                  <label htmlFor="loan-doc-number" className="block text-sm font-medium text-gray-700 mb-1">Número de Documento</label>
                   <input
+                    id="loan-doc-number"
                     required
                     type="text"
                     name="docNumber"
@@ -251,8 +268,9 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
+                  <label htmlFor="loan-email" className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
                   <input
+                    id="loan-email"
                     required
                     type="email"
                     name="email"
@@ -273,8 +291,9 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Número de Celular</label>
+                  <label htmlFor="loan-phone" className="block text-sm font-medium text-gray-700 mb-1">Número de Celular</label>
                   <input
+                    id="loan-phone"
                     required
                     type="text"
                     name="phone"
@@ -307,8 +326,9 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="col-span-1 md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Empresa donde trabajas</label>
+                  <label htmlFor="loan-company" className="block text-sm font-medium text-gray-700 mb-1">Empresa donde trabajas</label>
                   <input
+                    id="loan-company"
                     required
                     type="text"
                     name="company"
@@ -329,8 +349,9 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Contrato</label>
+                  <label htmlFor="loan-contract-type" className="block text-sm font-medium text-gray-700 mb-1">Tipo de Contrato</label>
                   <select
+                    id="loan-contract-type"
                     name="contractType"
                     value={formData.contractType}
                     onChange={handleChange}
@@ -351,12 +372,13 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Salario Mensual Aproximado</label>
+                  <label htmlFor="loan-salary" className="block text-sm font-medium text-gray-700 mb-1">Salario Mensual Aproximado</label>
                   <div className="relative rounded-md shadow-sm">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                       <span className="text-gray-500 sm:text-sm">$</span>
                     </div>
                     <input
+                      id="loan-salary"
                       required
                       type="text"
                       name="salary"
@@ -388,12 +410,13 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Monto a Solicitar</label>
+                <label htmlFor="loan-amount" className="block text-sm font-medium text-gray-700 mb-1">Monto a Solicitar</label>
                 <div className="relative rounded-md shadow-sm">
                   <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                     <span className="text-gray-500 sm:text-sm">$</span>
                   </div>
                   <input
+                    id="loan-amount"
                     required
                     type="text"
                     name="amount"
@@ -430,6 +453,7 @@ export const LoanRequestPage: React.FC<LoanRequestPageProps> = ({ onNavigate }) 
             <button
               type="submit"
               disabled={isSubmitting}
+              aria-busy={isSubmitting}
               className={`flex items-center gap-2 py-3 px-8 border border-transparent rounded-lg shadow-sm text-base font-medium text-white ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-brand-600 hover:bg-brand-700'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-all`}
             >
               {isSubmitting ? 'Enviando...' : (

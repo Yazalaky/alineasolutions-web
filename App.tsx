@@ -47,8 +47,14 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col font-sans relative">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:px-4 focus:py-2 focus:bg-white focus:text-brand-900 focus:rounded-md focus:shadow-lg"
+      >
+        Saltar al contenido principal
+      </a>
       <Header currentView={currentView} onNavigate={handleNavigate} />
-      <main className="flex-grow">
+      <main id="main-content" tabIndex={-1} className="flex-grow focus:outline-none">
         {renderView()}
       </main>
       <Footer />

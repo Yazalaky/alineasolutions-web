@@ -38,18 +38,20 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
           </button>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-6 items-center">
+          <nav aria-label="Navegación principal" className="hidden md:flex space-x-6 items-center">
             <button 
+              type="button"
               onClick={() => handleNav('home')}
               aria-current={currentView === 'home' ? 'page' : undefined}
-              className={`text-base font-semibold transition-colors ${currentView === 'home' ? 'text-accent-500' : 'text-gray-500 hover:text-accent-500'}`}
+              className={`text-base font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 rounded-md ${currentView === 'home' ? 'text-accent-500' : 'text-gray-500 hover:text-accent-500'}`}
             >
               Inicio
             </button>
             <button 
+              type="button"
               onClick={() => handleNav('simulator')}
               aria-current={currentView === 'simulator' ? 'page' : undefined}
-              className={`text-base font-semibold transition-colors ${currentView === 'simulator' ? 'text-accent-500' : 'text-gray-500 hover:text-accent-500'}`}
+              className={`text-base font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 rounded-md ${currentView === 'simulator' ? 'text-accent-500' : 'text-gray-500 hover:text-accent-500'}`}
             >
               Simulador
             </button>
@@ -59,17 +61,19 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
               href={PSE_PAYMENT_URL}
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-full transition-all group"
+              className="flex items-center gap-2 px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-full transition-all group focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2"
               title="Ir a Pagos PSE"
+              aria-label="Ir a Pagos PSE, se abre en una nueva pestaña"
             >
               <PseLogo className="w-7 h-7" />
               <span className="text-base font-bold text-gray-700 group-hover:text-brand-900">Pagos PSE</span>
             </a>
 
             <button 
+              type="button"
               onClick={() => handleNav('apply')}
               aria-current={currentView === 'apply' ? 'page' : undefined}
-              className="px-7 py-3 text-base font-bold text-white bg-brand-900 hover:bg-brand-800 rounded-full transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              className="px-7 py-3 text-base font-bold text-white bg-brand-900 hover:bg-brand-800 rounded-full transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2"
             >
               Solicita tu crédito
             </button>
@@ -78,8 +82,12 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
             <button 
+              type="button"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-brand-900 hover:text-accent-500 focus:outline-none transition-colors"
+              className="text-brand-900 hover:text-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 rounded-md transition-colors"
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-navigation"
+              aria-label={isMenuOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación'}
             >
               {isMenuOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
             </button>
@@ -89,19 +97,25 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 absolute w-full shadow-lg z-50">
+        <div
+          id="mobile-navigation"
+          aria-label="Navegación móvil"
+          className="md:hidden bg-white border-t border-gray-100 absolute w-full shadow-lg z-50"
+        >
           <div className="px-4 pt-2 pb-6 space-y-2">
             <button 
+              type="button"
               onClick={() => handleNav('home')}
               aria-current={currentView === 'home' ? 'page' : undefined}
-              className="block w-full text-left px-3 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-md"
+              className="block w-full text-left px-3 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-md focus:outline-none focus:ring-2 focus:ring-accent-500"
             >
               Inicio
             </button>
             <button 
+              type="button"
               onClick={() => handleNav('simulator')}
               aria-current={currentView === 'simulator' ? 'page' : undefined}
-              className="block w-full text-left px-3 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-md"
+              className="block w-full text-left px-3 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-md focus:outline-none focus:ring-2 focus:ring-accent-500"
             >
               Simulador
             </button>
@@ -110,16 +124,18 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
               href={PSE_PAYMENT_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex w-full items-center gap-3 px-3 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-md"
+              className="flex w-full items-center gap-3 px-3 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-md focus:outline-none focus:ring-2 focus:ring-accent-500"
+              aria-label="Pagos en línea PSE, se abre en una nueva pestaña"
             >
               <PseLogo className="w-6 h-6" />
               Pagos en Línea (PSE)
             </a>
 
             <button 
+              type="button"
               onClick={() => handleNav('apply')}
               aria-current={currentView === 'apply' ? 'page' : undefined}
-              className="block w-full text-left px-3 py-3 text-base font-bold text-white bg-brand-900 rounded-md mt-4 text-center"
+              className="block w-full text-left px-3 py-3 text-base font-bold text-white bg-brand-900 rounded-md mt-4 text-center focus:outline-none focus:ring-2 focus:ring-accent-500"
             >
               Solicita tu crédito
             </button>
